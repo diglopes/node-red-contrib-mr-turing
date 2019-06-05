@@ -1,0 +1,22 @@
+{
+  "name": "red-contrib-mr-turing",
+  "version": "1.0.0",
+  "description": "A node that makes a request to Mr Turing API",
+  "main": "mr-turing.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "node-red": {
+    "nodes": {
+      "mr-turing": "mr-turing.js"
+    }
+  },
+  "author": "Diego Lopes",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4"
+  }
+}
