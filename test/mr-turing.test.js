@@ -11,22 +11,23 @@ const keys = require("../helpers/keys.json");
 
 describe("Mr turing API Access", function() {
   it("Should get an valid access token", async () => {
-    const { data } = await getToken(keys);
-    const { access_token, token_type } = data;
+    const { access_token, token_type } = await getToken(keys);
     MOCK_TOKEN = access_token;
     assert.deepEqual(token_type, "Bearer");
   });
 
   it("Should bring the bots list", async () => {
-    const { data } = await getBotList(MOCK_TOKEN);
-    const { results } = data;
+    const { results } = await getBotList(MOCK_TOKEN);
     MOCK_BOT_PK = results[0].pk;
     assert.ok(results);
   });
 
   it("Should make a question to an existent bot and get some answer", async () => {
-    const { data } = await makeQuestion(MOCK_QUESTION, MOCK_BOT_PK, MOCK_TOKEN);
-    const { conversation_id } = data;
+    const { conversation_id } = await makeQuestion(
+      MOCK_QUESTION,
+      MOCK_BOT_PK,
+      MOCK_TOKEN
+    );
     assert.ok(conversation_id);
   });
 });
