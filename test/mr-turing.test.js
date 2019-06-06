@@ -13,18 +13,19 @@ describe("Mr turing API Access", function() {
     const { data } = await getToken(keys);
     const { access_token, token_type } = data;
     MOCK_TOKEN = access_token;
-    console.log(MOCK_TOKEN);
     assert.deepEqual(token_type, "Bearer");
   });
 
   it("Should bring the bots list", async () => {
-    const { results } = await getBotList(MOCK_TOKEN);
+    const { data } = await getBotList(MOCK_TOKEN);
+    const { results } = data;
     MOCK_BOT_PK = results[0].pk;
     assert.ok(results);
   });
 
   it("Should make a question to an existent bot and get some answer", async () => {
-    const { conversation_id } = await makeQuestion(MOCK_QUESTION, MOCK_BOT_PK);
+    const { data } = await makeQuestion(MOCK_QUESTION, MOCK_BOT_PK);
+    const { conversation_id } = data;
     assert.ok(conversation_id);
   });
 });

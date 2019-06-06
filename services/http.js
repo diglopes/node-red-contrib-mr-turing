@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 const http = axios.create({
-  baseUrl: "https://qa.misterturing.com"
+  baseURL: "https://qa.misterturing.com/rest"
 });
 
 module.exports = http;
