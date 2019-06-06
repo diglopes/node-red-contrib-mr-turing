@@ -11,7 +11,12 @@ const keys = require("../helpers/keys.json");
 
 describe("Mr turing API Access", function() {
   it("Should get an valid access token", async () => {
-    const { access_token, token_type } = await getToken(keys);
+    const { access_token, token_type } = await getToken(
+      keys.client_id,
+      keys.client_secret,
+      keys.user,
+      keys.password
+    );
     MOCK_TOKEN = access_token;
     assert.deepEqual(token_type, "Bearer");
   });
