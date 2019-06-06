@@ -1,13 +1,13 @@
 const assert = require("assert");
-const getToken = require("../util/getToken");
-const getBotList = require("../util/getBotList");
-const makeQuestion = require("../util/makeQuestion");
+const getToken = require("../src/util/getToken");
+const getBotList = require("../src/util/getBotList");
+const makeQuestion = require("../src/util/makeQuestion");
 
 let MOCK_TOKEN = "";
 let MOCK_BOT_PK = "";
 let MOCK_QUESTION = "a";
 
-const keys = require("../helpers/keys.json");
+const keys = require("../src/helpers/keys.json");
 
 describe("Mr turing API Access", function() {
   it("Should get an valid access token", async () => {

@@ -1,15 +1,15 @@
 {
-  "name": "red-contrib-mr-turing",
-  "version": "1.0.0",
-  "description": "A node that makes a request to Mr Turing API",
-  "main": "mr-turing.js",
-  "scripts": {
-    "test": "mocha ./test/*.js"
-  },
+  "name": "node-red-contrib-mr-turing",
   "node-red": {
     "nodes": {
-      "mr-turing": "mr-turing.js"
+      "mr-turing-auth": "mr-turing-auth.js"
     }
+  },
+  "version": "1.0.0",
+  "description": "A node that makes a request to Mr Turing API",
+  "main": "mr-turing-auth.js",
+  "scripts": {
+    "test": "mocha ./test/*.js"
   },
   "author": "Diego Lopes",
   "license": "MIT",

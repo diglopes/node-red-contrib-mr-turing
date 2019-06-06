@@ -1,0 +1,60 @@
+<script type="text/javascript">
+    RED.nodes.registerType("mr-turing-auth", {
+        category: "function",
+        color: "#C0C0C0",
+        defaults: {
+            clientID: {
+                value: "",
+                required: true
+            },
+            clientSecret: {
+                value: "",
+                required: true
+            },
+            user: {
+                value: "",
+                required: true
+            },
+            password: {
+                value: "",
+                required: true
+            },
+            name: {
+                value: ""
+            }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "fa-key.png",
+        label: function () {
+            return this.name || "mr turing auth";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mr-turing-auth">
+    <div class="form-row">
+        <label for="node-input-clientID"><i class="fa fa-key"></i> Client ID</label>
+        <input type="password" id="node-input-clientID" placeholder="Client ID">
+    </div>
+    <div class="form-row">
+        <label for="node-input-clientSecret"><i class="fa fa-key"></i> Client Secret</label>
+        <input type="password" id="node-input-clientSecret" placeholder="Client Secret">
+    </div>
+    <div class="form-row">
+        <label for="node-input-client-user"><i class="fa fa-user"></i> User</label>
+        <input type="text" id="node-input-user" placeholder="User">
+    </div>
+    <div class="form-row">
+        <label for="node-input-client-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-input-password" placeholder="Password">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+  </script>
+
+<script type="text/x-red" data-help-name="spotify-api">
+    <p>A node that bring the bots list</p>
+  </script>
