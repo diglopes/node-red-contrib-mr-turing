@@ -5,6 +5,7 @@ const makeQuestion = require("../util/makeQuestion");
 
 let MOCK_TOKEN = "";
 let MOCK_BOT_PK = "";
+let MOCK_QUESTION = "a";
 
 const keys = require("../helpers/keys.json");
 
@@ -24,7 +25,7 @@ describe("Mr turing API Access", function() {
   });
 
   it("Should make a question to an existent bot and get some answer", async () => {
-    const { data } = await makeQuestion(MOCK_QUESTION, MOCK_BOT_PK);
+    const { data } = await makeQuestion(MOCK_QUESTION, MOCK_BOT_PK, MOCK_TOKEN);
     const { conversation_id } = data;
     assert.ok(conversation_id);
   });
