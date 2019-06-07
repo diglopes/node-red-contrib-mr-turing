@@ -2,12 +2,12 @@
   "name": "node-red-contrib-mr-turing",
   "node-red": {
     "nodes": {
-      "mr-turing-auth": "mr-turing-auth.js"
+      "mr-turing-auth": "./src/mr-turing.js"
     }
   },
   "version": "1.0.0",
   "description": "A node that makes a request to Mr Turing API",
-  "main": "mr-turing-auth.js",
+  "main": "./src/mr-turing.js",
   "scripts": {
     "test": "mocha ./test/*.js"
   },

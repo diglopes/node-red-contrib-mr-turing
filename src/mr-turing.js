@@ -2,7 +2,7 @@ const getToken = require("./util/getToken");
 const getBotList = require("./util/getBotList");
 
 module.exports = function(RED) {
-  function MrTuringAuth(config) {
+  function MrTuring(config) {
     RED.nodes.createNode(this, config);
     this.clientID = config.clientID;
     this.clientSecret = config.clientSecret;
@@ -21,5 +21,5 @@ module.exports = function(RED) {
       node.send(msg);
     });
   }
-  RED.nodes.registerType("mr-turing-auth", MrTuringAuth);
+  RED.nodes.registerType("mr-turing", MrTuring);
 };
