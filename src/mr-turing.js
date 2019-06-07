@@ -1,5 +1,6 @@
 const getToken = require("./util/getToken");
 const getBotList = require("./util/getBotList");
+const makeQuestion = require("./util/makeQuestion");
 
 module.exports = function(RED) {
   function MrTuring(config) {
@@ -8,16 +9,33 @@ module.exports = function(RED) {
     this.clientSecret = config.clientSecret;
     this.user = config.user;
     this.password = config.password;
+    this.botName = config.botName;
     const node = this;
     node.on("input", async msg => {
       const { access_token } = await getToken(
         node.clientID,
         node.clientSecret,
         node.user,
-        node.password
+        node.password,
+        node.botName
       );
       const { results } = await getBotList(access_token);
-      msg.payload = results;
+
+      try {
+        const [selectedBot] = results.filter(
+          bot =>
+            bot.name.toLowerCase().trim() === node.botName.toLowerCase().trim()
+        );
+
+        msg.payload = await makeQuestion(
+          msg.payload,
+          selectedBot.pk,
+          access_token
+        );
+      } catch (error) {
+        msg.payload = "Não foi possivel acessar o bot selecionado";
+      }
+
       node.send(msg);
     });
   }
