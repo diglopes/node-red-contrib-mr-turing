@@ -26,12 +26,17 @@ module.exports = function(RED) {
           bot =>
             bot.name.toLowerCase().trim() === node.botName.toLowerCase().trim()
         );
-
+        node.status({
+          fill: "yellow",
+          text: "Receiving Answer",
+          shape: "ring"
+        });
         msg.payload = await makeQuestion(
           msg.payload,
           selectedBot.pk,
           access_token
         );
+        node.status({});
       } catch (error) {
         msg.payload = "Não foi possivel acessar o bot selecionado";
       }
