@@ -1,0 +1,47 @@
+<script type="text/javascript">
+    RED.nodes.registerType('mr-turing-auth', {
+        category: 'config',
+        defaults: {
+            user: {
+                type: '',
+                required: true
+            }
+        },
+        credentials: {
+            clientID: {
+                type: 'passoword',
+                required: true
+            },
+            clientSecret: {
+                type: 'passoword',
+                required: true
+            },
+            password: {
+                type: 'passoword',
+                required: true
+            },
+        },
+        label: function () {
+            return this.user;
+        },
+    })
+</script>
+
+<script type="text/x-red" data-template-name="mr-turing-auth">
+    <div class="form-row">
+        <label for="node-config-input-clientID"><i class="fa fa-user"></i> Client ID</label>
+        <input type="password" id="node-config-input-clientID" placeholder="Client ID">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-clientSecret"><i class="fa fa-user-secret"></i> Client Secret</label>
+        <input type="password" id="node-config-input-clientSecret" placeholder="Client Secret">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-user"><i class="fa fa-user-circle"></i> User</label>
+        <input type="text" id="node-config-input-user" placeholder="User">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-key"></i> Password</label>
+        <input type="password" id="node-config-input-password" placeholder="Password">
+    </div>
+</script>

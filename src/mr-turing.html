@@ -3,21 +3,9 @@
         category: "function",
         color: "#fff",
         defaults: {
-            clientID: {
+            connection: {
                 value: "",
-                required: true
-            },
-            clientSecret: {
-                value: "",
-                required: true
-            },
-            user: {
-                value: "",
-                required: true
-            },
-            password: {
-                value: "",
-                required: true
+                type: "mr-turing-auth"
             },
             botName: {
                 value: "",
@@ -37,21 +25,10 @@
 </script>
 
 <script type="text/x-red" data-template-name="mr-turing">
+
     <div class="form-row">
-        <label for="node-input-clientID"><i class="fa fa-user"></i> Client ID</label>
-        <input type="password" id="node-input-clientID" placeholder="Client ID">
-    </div>
-    <div class="form-row">
-        <label for="node-input-clientSecret"><i class="fa fa-user-secret"></i> Client Secret</label>
-        <input type="password" id="node-input-clientSecret" placeholder="Client Secret">
-    </div>
-    <div class="form-row">
-        <label for="node-input-user"><i class="fa fa-user-circle"></i> User</label>
-        <input type="text" id="node-input-user" placeholder="User">
-    </div>
-    <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
+        <label for="node-input-connection"><i class="icon-tag"></i> connection</label>
+        <input type="text" id="node-input-connection">
     </div>
     <div class="form-row">
         <label for="node-input-botName"><i class="fa fa-comments"></i> Bot Name</label>
@@ -65,4 +42,4 @@
 
 <script type="text/x-red" data-help-name="mr-turing">
     <p>A node that chat with Mr turing bots</p>
-  </script>
+</script>
