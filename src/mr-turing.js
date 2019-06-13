@@ -8,21 +8,28 @@ module.exports = function(RED) {
 
     this.botName = config.botName;
     const node = this;
+    let token = {};
+    let expires_in = 0;
+    let botList = {};
 
     node.connection = RED.nodes.getNode(config.connection);
 
     node.on("input", async msg => {
-      const { access_token } = await getToken(
-        node.connection.credentials.clientID,
-        node.connection.credentials.clientSecret,
-        node.connection.user,
-        node.connection.credentials.password,
-        node.connection.credentials.botName
-      );
-      const { results } = await getBotList(access_token);
+      if (!token || new Date().getTime() / 1000 > expires_in) {
+        token = await getToken(
+          node.connection.credentials.clientID,
+          node.connection.credentials.clientSecret,
+          node.connection.user,
+          node.connection.credentials.password
+        );
+
+        const data = await getBotList(token.access_token);
+        botList = data.results;
+        expires_in = token.expires_in + Math.floor(new Date().getTime() / 1000);
+      }
 
       try {
-        const [selectedBot] = results.filter(
+        const [selectedBot] = botList.filter(
           bot =>
             bot.name.toLowerCase().trim() === node.botName.toLowerCase().trim()
         );
@@ -34,7 +41,7 @@ module.exports = function(RED) {
         msg.payload = await makeQuestion(
           msg.payload,
           selectedBot.pk,
-          access_token
+          token.access_token
         );
         node.status({});
       } catch (error) {
