@@ -5,19 +5,19 @@ const makeQuestion = require("./util/makeQuestion");
 module.exports = function(RED) {
   function MrTuring(config) {
     RED.nodes.createNode(this, config);
-    this.clientID = config.clientID;
-    this.clientSecret = config.clientSecret;
-    this.user = config.user;
-    this.password = config.password;
+
     this.botName = config.botName;
     const node = this;
+
+    node.connection = RED.nodes.getNode(config.connection);
+
     node.on("input", async msg => {
       const { access_token } = await getToken(
-        node.clientID,
-        node.clientSecret,
-        node.user,
-        node.password,
-        node.botName
+        node.connection.credentials.clientID,
+        node.connection.credentials.clientSecret,
+        node.connection.user,
+        node.connection.credentials.password,
+        node.connection.credentials.botName
       );
       const { results } = await getBotList(access_token);
 
