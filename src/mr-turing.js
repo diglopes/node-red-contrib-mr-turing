@@ -6,8 +6,9 @@ module.exports = function(RED) {
   function MrTuring(config) {
     RED.nodes.createNode(this, config);
 
-    this.botName = config.botName;
     const node = this;
+    node.botName = config.botName;
+    node.random = config.random || false;
     let token = {};
     let expires_in = 0;
     let botList = {};
@@ -48,7 +49,18 @@ module.exports = function(RED) {
         msg.payload = "Não foi possivel acessar o bot selecionado";
       }
 
-      node.send(msg);
+      if (node.random) {
+        const random = Math.floor(Math.random() * msg.payload.output.length);
+        const { conversation_id, output } = msg.payload;
+        msg.payload = {
+          conversation_id,
+          random_output: output[random]
+        };
+
+        node.send(msg);
+      } else {
+        node.send(msg);
+      }
     });
   }
   RED.nodes.registerType("mr-turing", MrTuring);
