@@ -60,7 +60,15 @@ module.exports = function(RED) {
           node.send(msg);
         }
       } catch (error) {
-        node.status({ fill: "red", shape: "ring", text: "error" });
+        node.status({ fill: "red", shape: "ring", text: "chat fail" });
+
+        if (error.message.includes("pk")) {
+          error.message = "Couldn't found the chatbot named";
+        }
+        if (error.message.includes("401")) {
+          error.message = "Couldn't authenticate";
+        }
+
         node.error(error);
       }
     });
