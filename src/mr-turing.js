@@ -9,27 +9,29 @@ module.exports = function(RED) {
     const node = this;
     node.botName = config.botName;
     node.random = config.random || false;
+    node.connection = RED.nodes.getNode(config.connection);
     let token = {};
     let expires_in = 0;
     let botList = {};
 
-    node.connection = RED.nodes.getNode(config.connection);
+    node.status({});
 
     node.on("input", async msg => {
-      if (!token || new Date().getTime() / 1000 > expires_in) {
-        token = await getToken(
-          node.connection.credentials.clientID,
-          node.connection.credentials.clientSecret,
-          node.connection.user,
-          node.connection.credentials.password
-        );
-
-        const data = await getBotList(token.access_token);
-        botList = data.results;
-        expires_in = token.expires_in + Math.floor(new Date().getTime() / 1000);
-      }
-
       try {
+        if (!token || new Date().getTime() / 1000 > expires_in) {
+          token = await getToken(
+            node.connection.credentials.clientID,
+            node.connection.credentials.clientSecret,
+            node.connection.user,
+            node.connection.credentials.password
+          );
+
+          const data = await getBotList(token.access_token);
+          botList = data.results;
+          expires_in =
+            token.expires_in + Math.floor(new Date().getTime() / 1000);
+        }
+
         const [selectedBot] = botList.filter(
           bot =>
             bot.name.toLowerCase().trim() === node.botName.toLowerCase().trim()
@@ -45,21 +47,21 @@ module.exports = function(RED) {
           token.access_token
         );
         node.status({});
+        if (node.random) {
+          const random = Math.floor(Math.random() * msg.payload.output.length);
+          const { conversation_id, output } = msg.payload;
+          msg.payload = {
+            conversation_id,
+            random_output: output[random]
+          };
+
+          node.send(msg);
+        } else {
+          node.send(msg);
+        }
       } catch (error) {
-        msg.payload = "Não foi possivel acessar o bot selecionado";
-      }
-
-      if (node.random) {
-        const random = Math.floor(Math.random() * msg.payload.output.length);
-        const { conversation_id, output } = msg.payload;
-        msg.payload = {
-          conversation_id,
-          random_output: output[random]
-        };
-
-        node.send(msg);
-      } else {
-        node.send(msg);
+        node.status({ fill: "red", shape: "ring", text: "error" });
+        node.error(error);
       }
     });
   }
