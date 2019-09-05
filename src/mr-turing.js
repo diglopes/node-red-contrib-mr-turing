@@ -36,13 +36,14 @@ module.exports = function(RED) {
           bot =>
             bot.name.toLowerCase().trim() === node.botName.toLowerCase().trim()
         );
+
         node.status({
           fill: "yellow",
           text: "Receiving Answer",
           shape: "ring"
         });
         msg.payload = await makeQuestion(
-          msg.payload,
+          msg.payload.question,
           selectedBot.pk,
           token.access_token
         );
@@ -67,6 +68,9 @@ module.exports = function(RED) {
         }
         if (error.message.includes("401")) {
           error.message = "Couldn't authenticate";
+        }
+        if (error.message.includes("400")) {
+          error.message = "msg.payload doesn't have the 'question' key";
         }
 
         node.error(error);
