@@ -1,5 +1,5 @@
-const getToken = require("./util/getToken");
-const getBotList = require("./util/getBotList");
+const getToken = require("../src/util/getToken");
+const getBotList = require("../src/util/getBotList");
 
 module.exports = function(RED) {
   function MrTuringAuth(config) {

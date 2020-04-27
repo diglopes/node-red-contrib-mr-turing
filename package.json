@@ -9,9 +9,6 @@
   "version": "1.0.3",
   "description": "A node that makes a request to Mr Turing API",
   "main": "./src/mr-turing.js",
-  "scripts": {
-    "test": "mocha ./test/*.js"
-  },
   "keywords": [
     "node-red",
     "mr. turing",
@@ -22,8 +19,5 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.19.0"
-  },
-  "devDependencies": {
-    "mocha": "^6.1.4"
   }
 }

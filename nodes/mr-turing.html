@@ -1,0 +1,54 @@
+<script type="text/javascript">
+  RED.nodes.registerType("mr-turing", {
+    category: "function",
+    color: "#fff",
+    defaults: {
+      connection: {
+        value: "",
+        type: "mr-turing-auth",
+      },
+      botName: {
+        value: "",
+        required: true,
+      },
+      name: {
+        value: "",
+      },
+      random: {
+        value: false,
+      },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "icon.png",
+    label: function () {
+      return this.name || "mr turing";
+    },
+  });
+</script>
+
+<script type="text/x-red" data-template-name="mr-turing">
+
+  <div class="form-row">
+      <label for="node-input-connection"><i class="icon-tag"></i> connection</label>
+      <input type="text" id="node-input-connection">
+  </div>
+  <div class="form-row">
+      <label for="node-input-botName"><i class="fa fa-comments"></i> Bot Name</label>
+      <input type="text" id="node-input-botName" placeholder="Bot name">
+  </div>
+  <div class="form-row">
+      <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+      <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+
+  <div class="form-row">
+      <label style="width:25%">Random</label>
+      <input type="checkbox" id="node-input-random" style="width:auto; vertical-align:top;">
+      <label for="node-input-random" style="width:auto;"> Enable random output</label>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="mr-turing">
+  <p>A node that chat with Mr turing bots</p>
+</script>
