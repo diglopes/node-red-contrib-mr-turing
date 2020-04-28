@@ -17,12 +17,25 @@ module.exports = function (RED) {
         user: node.connection.user,
       };
       try {
-        node.status({ fill: "yellow", shape: "dot", text: "asking..." });
-        const { output } = await askQuestionToBot(
-          msg.payload,
-          credentials,
-          node.botName
-        );
+        let response = null;
+        try {
+          node.status({ fill: "yellow", shape: "dot", text: "asking..." });
+          response = await askQuestionToBot(
+            msg.payload,
+            credentials,
+            node.botName
+          );
+        } catch (error) {
+          httpService.tokenExpTime = null;
+        }
+        if (!response) {
+          response = await askQuestionToBot(
+            msg.payload,
+            credentials,
+            node.botName
+          );
+        }
+        const { output } = response;
         const randomNumber = Math.floor(
           Math.random() * (output.length - 0) + 0
         );
@@ -35,8 +48,8 @@ module.exports = function (RED) {
       } catch (error) {
         node.status({
           fill: "red",
-          shape: "dot",
-          text: "not sended",
+          shape: "ring",
+          text: "question not sended",
         });
         node.error(error);
       }
@@ -46,8 +59,9 @@ module.exports = function (RED) {
 };
 
 const askQuestionToBot = async (question, credentials = {}, botName) => {
-  const { tokenExpTime } = httpService;
-  const isTokenValid = tokenExpTime && validateTokenExpTime(tokenExpTime);
+  const { tokenExpTime, token } = httpService;
+  const isTokenValid =
+    token && tokenExpTime && validateTokenExpTime(tokenExpTime);
   if (!isTokenValid) await httpService.getToken(credentials);
   if (!httpService.botId) await httpService.getKnowledgeId(botName);
   return httpService.sendQuestion(question);
@@ -56,14 +70,13 @@ const askQuestionToBot = async (question, credentials = {}, botName) => {
 const validateTokenExpTime = (expirationTime) =>
   expirationTime - DateTime.local().toSeconds() > 0;
 
-const request = axios.create({
-  baseURL: "https://backend.cluster.mrturing-k8s.com/rest/",
-});
-
 const httpService = {
   tokenExpTime: null,
   botId: null,
-  request,
+  token: null,
+  request: axios.create({
+    baseURL: "https://backend.cluster.mrturing-k8s.com/rest/",
+  }),
   getToken({
     user,
     password,
@@ -78,31 +91,27 @@ const httpService = {
         client_secret,
       })
       .then(({ data }) => {
+        this.token = data.access_token;
         this.tokenExpTime = DateTime.local()
           .plus({ seconds: data.expires_in })
           .toSeconds();
-        this.setTokenToHeaders(data.access_token);
       });
   },
   getKnowledgeId(knowledgeName) {
     return this.request
-      .get(`/knowledge-base?name=${knowledgeName}`)
+      .get(`/knowledge-base?name=${knowledgeName}`, this.getHeaderToken())
       .then(({ data }) => {
         this.botId = data.kb_id;
       });
   },
   sendQuestion(question) {
     return this.request
-      .post(`/chat`, { question, bot_id: this.botId })
+      .post(`/chat`, { question, bot_id: this.botId }, this.getHeaderToken())
       .then(({ data }) => data);
   },
-  setTokenToHeaders(token) {
-    request.interceptors.request.use(
-      (config) => {
-        config.headers.common.Authorization = `Bearer ${token}`;
-        return config;
-      },
-      (response) => Promise.reject(response)
-    );
+  getHeaderToken() {
+    return {
+      headers: { authorization: `Bearer ${this.token}` },
+    };
   },
 };
