@@ -2,6 +2,7 @@ const axios = require("axios");
 const { DateTime } = require("luxon");
 
 module.exports = function (RED) {
+  "use strict";
   function MrTuring(config) {
     RED.nodes.createNode(this, config);
 
@@ -16,12 +17,23 @@ module.exports = function (RED) {
         ...node.connection.credentials,
         user: node.connection.user,
       };
+      const question = msg.payload.question || msg.payload.q || msg.payload;
+      if (typeof question !== "string") {
+        node.status({
+          fill: "red",
+          shape: "ring",
+          text: "question not provided",
+        });
+        msg.error = new Error("Question was not provided");
+        send(msg);
+        return;
+      }
       try {
         let response = null;
         try {
           node.status({ fill: "yellow", shape: "dot", text: "asking..." });
           response = await askQuestionToBot(
-            msg.payload,
+            question,
             credentials,
             node.botName
           );
@@ -53,10 +65,15 @@ module.exports = function (RED) {
           shape: "ring",
           text: "question not sended",
         });
+        msg.error = error;
+        let errorMessage = "";
+        if (/obrigatório/gi.test(error.response.data.bot_id[0])) {
+          errorMessage = "Bot name is not valid";
+        }
         if (done) {
-          done(error);
+          done(errorMessage);
         } else {
-          node.error(error);
+          node.error(errorMessage);
         }
       }
     });
