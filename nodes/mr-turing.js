@@ -67,9 +67,20 @@ module.exports = function (RED) {
         });
         msg.error = error;
         let errorMessage = "";
-        if (/obrigatório/gi.test(error.response.data.bot_id[0])) {
-          errorMessage = "Bot name is not valid";
+
+        /**
+         * Handle invalid bot error
+         * */
+        if (error.response.data.bot_id) {
+          errorMessage = error.response.data.bot_id[0];
         }
+        /**
+         * Handle other errors
+         * */
+        if (error.response.data.detail) {
+          errorMessage = error.response.data.detail;
+        }
+
         if (done) {
           done(errorMessage);
         } else {
