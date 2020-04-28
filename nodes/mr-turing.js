@@ -72,7 +72,7 @@ module.exports = function (RED) {
          * Handle invalid bot error
          * */
         if (error.response.data.bot_id) {
-          errorMessage = error.response.data.bot_id[0];
+          errorMessage = "O bot provido é inválido";
         }
         /**
          * Handle other errors
@@ -87,6 +87,12 @@ module.exports = function (RED) {
           node.error(errorMessage);
         }
       }
+    });
+
+    node.on("close", () => {
+      httpService.tokenExpTime = null;
+      httpService.botId = null;
+      httpService.token = null;
     });
   }
   RED.nodes.registerType("mr-turing", MrTuring);
