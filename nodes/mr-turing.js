@@ -44,14 +44,20 @@ module.exports = function (RED) {
           : output;
 
         node.status({});
+
         send(msg);
+        if (done) done();
       } catch (error) {
         node.status({
           fill: "red",
           shape: "ring",
           text: "question not sended",
         });
-        node.error(error);
+        if (done) {
+          done(error);
+        } else {
+          node.error(error);
+        }
       }
     });
   }
