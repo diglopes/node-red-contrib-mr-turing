@@ -1,7 +1,4 @@
-const getToken = require("../src/util/getToken");
-const getBotList = require("../src/util/getBotList");
-
-module.exports = function(RED) {
+module.exports = function (RED) {
   function MrTuringAuth(config) {
     RED.nodes.createNode(this, config);
     let node = this;
@@ -17,16 +14,16 @@ module.exports = function(RED) {
     credentials: {
       clientID: {
         type: "passoword",
-        required: true
+        required: true,
       },
       clientSecret: {
         type: "passoword",
-        required: true
+        required: true,
       },
       password: {
         type: "passoword",
-        required: true
-      }
-    }
+        required: true,
+      },
+    },
   });
 };
