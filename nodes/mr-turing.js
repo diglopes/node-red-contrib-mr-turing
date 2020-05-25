@@ -42,7 +42,7 @@ module.exports = function (RED) {
         }
         if (!response) {
           response = await askQuestionToBot(
-            msg.payload,
+            question,
             credentials,
             node.botName
           );
