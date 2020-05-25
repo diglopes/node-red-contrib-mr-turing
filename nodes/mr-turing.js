@@ -60,6 +60,7 @@ module.exports = function (RED) {
         send(msg);
         if (done) done();
       } catch (error) {
+        node.error({ Error: error.response });
         node.status({
           fill: "red",
           shape: "ring",

@@ -6,7 +6,7 @@
       "mr-turing": "./nodes/mr-turing.js"
     }
   },
-  "version": "2.0.0",
+  "version": "2.1.1",
   "description": "A node that makes a request to Mr Turing API",
   "main": "./src/mr-turing.js",
   "keywords": [
