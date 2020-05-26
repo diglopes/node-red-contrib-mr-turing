@@ -1,158 +1,105 @@
-const axios = require("axios");
-const { DateTime } = require("luxon");
 
 module.exports = function (RED) {
   "use strict";
-  function MrTuring(config) {
-    RED.nodes.createNode(this, config);
+  const axios = require("axios");
+  const { DateTime } = require("luxon");
 
-    const node = this;
-    node.botName = config.botName;
-    node.random = config.random || false;
-    node.connection = RED.nodes.getNode(config.connection);
-    node.status({});
+  function MrTuring(n) {
+    RED.nodes.createNode(this, n);
 
-    node.on("input", async (msg, send, done) => {
-      const credentials = {
-        ...node.connection.credentials,
-        user: node.connection.user,
-      };
-      const question = msg.payload.question || msg.payload.q || msg.payload;
-      if (typeof question !== "string") {
-        node.status({
-          fill: "red",
-          shape: "ring",
-          text: "question not provided",
-        });
-        msg.error = new Error("Question was not provided");
-        send(msg);
-        return;
-      }
+    // Configuration options passed by Node red
+    this.botName = n.botName;
+    this.random = n.random || false;
+    this.connection = RED.nodes.getNode(n.connection);
+
+    // Config node state
+    const baseURL = "https://backend.cluster.mrturing-k8s.com/rest/"
+    this.http = axios.create({ baseURL })
+    this.token = ""
+    this.tokenExpTime = null
+    this.selectedBotId = null
+    this.isTokenExpired = () => this.tokenExpTime && this.tokenExpTime - DateTime.local().toSeconds() <= 0
+
+    this.on("input", async (msg, send, done) => {
+      this.status({});
       try {
-        let response = null;
-        try {
-          node.status({ fill: "yellow", shape: "dot", text: "asking..." });
-          response = await askQuestionToBot(
-            question,
-            credentials,
-            node.botName
-          );
-        } catch (error) {
-          httpService.tokenExpTime = null;
+        if(!this.token || typeof this.token !== 'string' || this.isTokenExpired()) {
+          
+          /**
+           * Get a new token if there's no one avaiable
+           */
+          this.status({ fill: 'blue', shape: "dot", text: "Getting token" });
+          const { 
+            clientID: client_id, 
+            clientSecret: client_secret, 
+            password 
+          } = this.connection.credentials
+          const { data } = await this.http.post("/token-service", {
+            client_id,
+            client_secret,
+            password,
+            user: this.connection.user
+          })
+          this.token = data.access_token
+          this.tokenExpTime = DateTime.local()
+            .plus({ seconds: data.expires_in })
+            .toSeconds();
         }
-        if (!response) {
-          response = await askQuestionToBot(
-            question,
-            credentials,
-            node.botName
-          );
+
+        if(this.token && !this.selectedBotId || typeof this.selectedBotId !== 'number') {
+          /**
+           * Get the id related to the choosed bot
+           */
+          this.status({ fill: 'blue', shape: "dot", text: "Getting bot id" });
+          const { data } = await this.http.get(`/knowledge-base?name=${this.botName}`, {
+            headers: { Authorization: `Bearer ${this.token}` }
+          })
+          this.selectedBotId = data.kb_id
         }
-        const { output } = response;
-        const randomNumber = Math.floor(
-          Math.random() * (output.length - 0) + 0
-        );
-        msg.payload = node.random
-          ? (msg.payload = output[randomNumber])
-          : output;
 
-        node.status({});
-
-        send(msg);
-        if (done) done();
+        if(this.selectedBotId && this.token) {
+          /**
+           * Send a question to Kwonledge base and return a response
+           */
+          this.status({ fill: 'yellow', shape: "dot", text: "Sending question" });
+          const question = msg.payload.question || msg.payload.q || msg.payload
+          if(typeof question === 'string') {
+            const { data } = await this.http.post('/chat', 
+              { question, bot_id: this.selectedBotId },
+              { headers: { Authorization: `Bearer ${this.token}` } }
+            )
+            this.status({})
+            if(this.random) {
+              /**
+               * Pick a random answer if the checkbox is selected on Node-red
+               */
+              const max = data.output.length
+              const min = 0
+              const randomNum = Math.floor(Math.random() * (max - min) + min)
+              data.output = data.output[randomNum]
+            }
+            msg.payload = data
+            send(msg)
+            if(done) done()
+          } 
+        }
       } catch (error) {
-        node.error({ Error: error.response });
-        node.status({
-          fill: "red",
-          shape: "ring",
-          text: "question not sended",
-        });
-        msg.error = error;
-        let errorMessage = "";
-
-        /**
-         * Handle invalid bot error
-         * */
-        if (error.response.data.bot_id) {
-          errorMessage = "O bot provido é inválido";
-        }
-        /**
-         * Handle other errors
-         * */
-        if (error.response.data.detail) {
-          errorMessage = error.response.data.detail;
-        }
-
-        if (done) {
-          done(errorMessage);
+        this.status({ fill: 'red', shape: "ring", text: "Error" });
+        if(error.response) {
+          this.error({ Error: error.response })
+          if(error.response.status === 401) {
+            /**
+            * Reset token when it is invalid
+            */
+            this.token = null
+            this.tokenExpTime = null
+          }
         } else {
-          node.error(errorMessage);
+          this.error({ Error: error })
         }
       }
-    });
-
-    node.on("close", () => {
-      httpService.tokenExpTime = null;
-      httpService.botId = null;
-      httpService.token = null;
     });
   }
   RED.nodes.registerType("mr-turing", MrTuring);
 };
 
-const askQuestionToBot = async (question, credentials = {}, botName) => {
-  const { tokenExpTime, token } = httpService;
-  const isTokenValid =
-    token && tokenExpTime && validateTokenExpTime(tokenExpTime);
-  if (!isTokenValid) await httpService.getToken(credentials);
-  if (!httpService.botId) await httpService.getKnowledgeId(botName);
-  return httpService.sendQuestion(question);
-};
-
-const validateTokenExpTime = (expirationTime) =>
-  expirationTime - DateTime.local().toSeconds() > 0;
-
-const httpService = {
-  tokenExpTime: null,
-  botId: null,
-  token: null,
-  request: axios.create({
-    baseURL: "https://backend.cluster.mrturing-k8s.com/rest/",
-  }),
-  getToken({
-    user,
-    password,
-    clientID: client_id,
-    clientSecret: client_secret,
-  }) {
-    return this.request
-      .post("/token-service", {
-        user,
-        password,
-        client_id,
-        client_secret,
-      })
-      .then(({ data }) => {
-        this.token = data.access_token;
-        this.tokenExpTime = DateTime.local()
-          .plus({ seconds: data.expires_in })
-          .toSeconds();
-      });
-  },
-  getKnowledgeId(knowledgeName) {
-    return this.request
-      .get(`/knowledge-base?name=${knowledgeName}`, this.getHeaderToken())
-      .then(({ data }) => {
-        this.botId = data.kb_id;
-      });
-  },
-  sendQuestion(question) {
-    return this.request
-      .post(`/chat`, { question, bot_id: this.botId }, this.getHeaderToken())
-      .then(({ data }) => data);
-  },
-  getHeaderToken() {
-    return {
-      headers: { authorization: `Bearer ${this.token}` },
-    };
-  },
-};
