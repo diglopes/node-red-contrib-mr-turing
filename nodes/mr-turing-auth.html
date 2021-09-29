@@ -2,46 +2,30 @@
     RED.nodes.registerType('mr-turing-auth', {
         category: 'config',
         defaults: {
-            user: {
+            email: {
                 type: '',
                 required: true
             }
         },
         credentials: {
-            clientID: {
-                type: 'passoword',
-                required: true
-            },
-            clientSecret: {
-                type: 'passoword',
-                required: true
-            },
             password: {
-                type: 'passoword',
+                type: 'password',
                 required: true
             },
         },
         label: function () {
-            return this.user;
+            return this.email;
         },
     })
 </script>
 
 <script type="text/x-red" data-template-name="mr-turing-auth">
     <div class="form-row">
-        <label for="node-config-input-clientID"><i class="fa fa-user"></i> Client ID</label>
-        <input type="password" id="node-config-input-clientID" placeholder="Client ID">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-clientSecret"><i class="fa fa-user-secret"></i> Client Secret</label>
-        <input type="password" id="node-config-input-clientSecret" placeholder="Client Secret">
-    </div>
-    <div class="form-row">
-        <label for="node-config-input-user"><i class="fa fa-user-circle"></i> User</label>
-        <input type="text" id="node-config-input-user" placeholder="User">
+        <label for="node-config-input-email"><i class="fa fa-envelope"></i> Email</label>
+        <input type="text" id="node-config-input-email" placeholder="example@email.com">
     </div>
     <div class="form-row">
         <label for="node-config-input-password"><i class="fa fa-key"></i> Password</label>
-        <input type="password" id="node-config-input-password" placeholder="Password">
+        <input type="password" id="node-config-input-password" placeholder="your password">
     </div>
 </script>
