@@ -11,7 +11,7 @@ module.exports = function (RED) {
     this.botName = n.botName;
     this.random = n.random || false;
     this.login = RED.nodes.getNode(n.login);
-    this.kbs = []
+    this.knowledgeBase = n.knowledgeBase
 
     // Config node state
     this.token = "";
@@ -32,7 +32,10 @@ module.exports = function (RED) {
 
     this.on("input", async (msg, send, done) => {
       this.status({});
-      msg.payload = "OK"
+      const question = msg.payload
+      this.status({ text: "questioning", fill: "yellow", shape: "dot" })
+      const answers = await mrTuringService.ask(question, [this.knowledgeBase], this.accessToken)
+      msg.payload = answers
       this.status({})
       send(msg)
       done()
