@@ -28,11 +28,14 @@
       return this.name || "mr turing";
     },
     oneditprepare: function() {
-      function appendKbOptions(el, kbs, selectedItem) {
+      function appendKbOptions(el, kbs, selectedKb) {
         el.empty()
         kbs.forEach(kb => {
           el.append(`<option value="${kb.kb_id}">${kb.kb_name.trim()}</option>`)
         })
+        if(selectedKb) el
+            .find(`option[value=${selectedKb}]`)
+            .attr("selected", "selected")
       }
 
       const kbLoading = {
