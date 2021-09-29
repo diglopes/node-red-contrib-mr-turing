@@ -7,7 +7,11 @@
         value: "",
         type: "mr-turing-auth",
       },
-      botName: {
+      knowledgeBases: {
+        value: [],
+        required: true,
+      },
+      knowledgeBase: {
         value: "",
         required: true,
       },
@@ -24,6 +28,44 @@
     label: function () {
       return this.name || "mr turing";
     },
+    oneditprepare: function() {
+      function appendKbOptions(el, kbs, selectedItem) {
+        el.empty()
+        kbs.forEach(kb => {
+          el.append(`<option value="${kb.kb_id}">${kb.kb_name.trim()}</option>`)
+        })
+      }
+
+      const kbLoading = {
+        on: function() {
+          $(".kbs-btn-text-loading").show()
+          $(".kbs-btn-text").hide()
+          kbsSelectEl.prop("disabled", true)
+          loadButtonEl.prop("disabled", true)
+        },
+        off: function() {
+          $(".kbs-btn-text").show()
+          $(".kbs-btn-text-loading").hide()
+          loadButtonEl.prop("disabled", false)
+          kbsSelectEl.prop("disabled", false)
+        }
+      }
+
+      const loadButtonEl = $("#kbs-btn")
+      const kbsSelectEl = $("#node-input-knowledgeBase")
+
+      appendKbOptions(kbsSelectEl, this.knowledgeBases, this.knowledgeBase)
+
+      loadButtonEl.click(async () => {
+        
+        kbLoading.on()
+        const kbsBlob = await fetch(`/nodes/${this.id}/mr_turing/knowledge_bases`)
+        const { kbs } = await kbsBlob.json()
+        this.knowledgeBases = kbs
+        appendKbOptions(kbsSelectEl, kbs, this.knowledgeBase)
+        kbLoading.off()
+      })
+    }
   });
 </script>
 
@@ -33,9 +75,21 @@
       <label for="node-input-login"><i class="icon-tag"></i> Login</label>
       <input type="text" id="node-input-login">
   </div>
-  <div class="form-row">
-      <label for="node-input-botName"><i class="fa fa-comments"></i> Bot Name</label>
-      <input type="text" id="node-input-botName" placeholder="Bot name">
+  <div class="form-row" style="display: flex; align-items: center;">
+    <label for="node-input-knowledgeBase" style="width: 100px;"><i class="fa fa-file"></i> Kb</label>
+    <div style="width: 70%; display: flex; margin-left: 4px;">
+        <select id="node-input-knowledgeBase" style="flex: 1; margin-right: 8px;">
+            <option disabled selected value="">Select a Kb</option>
+        </select>
+        <button id="kbs-btn" type="button" class="red-ui-button">
+            <div class="kbs-btn-text-loading" style="display: none;">
+                <i class="fa fa-hourglass"></i> Loading
+            </div>
+            <div class="kbs-btn-text">
+                Load
+            </div>
+        </button>
+    </div>
   </div>
   <div class="form-row">
       <label for="node-input-name"><i class="icon-tag"></i> Name</label>
