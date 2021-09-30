@@ -1,9 +1,12 @@
 module.exports = function (RED) {
   "use strict";
-  const { DateTime } = require("luxon");
-  const mrTuringService = require("../lib/mr-turing-service")
-
+  const createMrTuringService = require("../lib/mr-turing-service")
+  const createStatusNotifier = require("../lib/status-notifier")
+  const mrTuringService = createMrTuringService()
+  
   function MrTuring(n) {
+    const status = createStatusNotifier(this)
+    
     RED.nodes.createNode(this, n);
 
     // Configuration options passed by Node red
@@ -13,30 +16,27 @@ module.exports = function (RED) {
     this.login = RED.nodes.getNode(n.login);
     this.knowledgeBase = n.knowledgeBase
 
-    // Config node state
-    this.token = "";
+    // Authenticate user
+    status.login()
     const { email } = this.login
     const { password } = this.login.credentials
-    mrTuringService
-      .login(email, password)
-      .then(({ access_token: accessToken }) => {
-        node.accessToken = accessToken
-      })
+    mrTuringService.login(email, password)
+    status.clear()
 
     // Editor Knowledge bases endpoint
     RED.httpNode.get(`/nodes/${n.id}/mr_turing/knowledge_bases`, async (_, res) => {
-      let kbs = await mrTuringService.getKnowledgeBases(node.accessToken)
+      let kbs = await mrTuringService.getKnowledgeBases()
       kbs = Array.isArray(kbs) ? kbs : []
       return res.send({ kbs })
     })
 
     this.on("input", async (msg, send, done) => {
-      this.status({});
+      status.clear()
       const question = msg.payload
-      this.status({ text: "questioning", fill: "yellow", shape: "dot" })
-      const answers = await mrTuringService.ask(question, [this.knowledgeBase], this.accessToken)
+      status.questioning()
+      const answers = await mrTuringService.ask(question, this.knowledgeBase)
       msg.payload = answers
-      this.status({})
+      status.clear()
       send(msg)
       done()
     });
